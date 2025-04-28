@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  --background-color: #fff;
+  --text-color: #000;
+}
+
+body[data-theme='dark'] {
+  --background-color: #181818;
+  --text-color: #fff;
+}
+
+.container {
+  padding: 16px;
+}
+
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+.content {
+  margin-left: 240px;
+  padding: 16px;
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+.message-bubble {
+  padding: 8px;
+  margin: 4px;
+  border-radius: 8px;
+}
+
+.message-sent {
+  background: #1976d2;
+  color: white;
+  align-self: flex-end;
+}
+
+.message-received {
+  background: #e0e0e0;
+  align-self: flex-start;
+}
