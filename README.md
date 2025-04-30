@@ -1,47 +1,66 @@
-SkillSync Frontend
-A React (Vite, TypeScript) frontend for a freelancing platform, built with Material-UI, Zustand, Context API, Axios, and react-router-dom.
-Prerequisites
+# 🎨 Freelancer Platform Frontend
 
-Node.js 18.x or later
-npm 8.x or later
-Backend running at http://localhost:3000
+A modern, responsive, and user-friendly frontend for the Freelancer Platform, built with React, TypeScript, and Material-UI.
 
-Installation
+## ✨ Features
 
-Clone the repository:
-git clone <repository-url>
-cd skillsync-frontend
+### 🏠 Landing & Authentication
+- Beautiful landing page with platform overview
+- User registration and login forms
 
 
-Install dependencies:
-npm install
+### 👤 User Dashboard
+- Personal profile management
+- Profile picture upload and customization
+- Skills and expertise management
+- Dashboard for Client and Freelancer
+- Account settings and preferences
+
+### 💼 Project Management
+
+- Project listing with advanced filters
+- Project details view
+- Project timeline visualization
+
+### 🔍 Search & Discovery
+- Advanced search functionality
+- Filter projects by category, budget, and deadlines
+- Search freelancer based on skills
+
+### 💰 Bidding System
+- Place bids on projects
+- Bid history and tracking
+- Automated bid notifications
 
 
-Start the development server:
-npm run dev
+### 📊 Milestone Management
+- Create and track milestones
+- Payment scheduling
+
+### 💸 Payment & Invoicing
+- Invoice generation 
+
+### 💬 Messaging System
+- Real-time chat interface
+- Message history 
+- File sharing in conversations
+
+### 📁 File Management
+- File upload interface
+- File download
+- Secure file sharing
+- File type validation
 
 
-Open http://localhost:3001 in your browser.
 
+## 🛠 Tech Stack
 
-Features
+- **Framework**: React
+- **Language**: TypeScript
+- **UI Library**: Material-UI (MUI)
+- **State Management**: Zustand
+- **Routing**: React Router
+- **HTTP Client**: Axios
+- **Build Tool**: Vite
+- **Styling**: Emotion
 
-Home, Login, Register pages
-Client Dashboard: Freelancer search, project management, bids, messages, files, milestones, invoices
-Freelancer Dashboard: Project browsing, bidding, project details
-Profile management with skills dropdown (freelancers only)
-Dark/light theme toggle
-Message polling (5 seconds)
-File uploads/downloads, invoice PDF downloads
-
-Directory Structure
-
-src/api: API calls
-src/components: Reusable UI components
-src/context: Theme and snackbar contexts
-src/pages: Page components
-src/stores: Zustand stores
-src/types: TypeScript interfaces
-
-Backend APIs
-Ensure the backend implements all APIs, including GET /files/:id and GET /invoices/:id/pdf.
