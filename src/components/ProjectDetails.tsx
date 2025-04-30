@@ -21,6 +21,9 @@ import {
   Select,
   MenuItem,
   Typography,
+  Box,
+  Card,
+  CardContent,
 } from '@mui/material';
 import { Project, Bid, Message, ProjectFile, Milestone, Invoice } from '../types';
 import useUserStore from '../stores/user';
@@ -38,6 +41,8 @@ import { createInvoice, getInvoicesByMilestone, updateInvoice, downloadInvoice }
 import { getBidsByProject } from '../api/bids';
 import { updateProject } from '../api/projects';
 import { getProjectById } from '../api/projects';
+import { Link } from 'react-router-dom';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 interface ProjectDetailsProps {
   project: Project;
@@ -305,7 +310,18 @@ function ProjectDetails({ project, setSelectedProject }: ProjectDetailsProps) {
                   });
                   return (
                     <TableRow key={bid.id}>
-                      <TableCell>{bid.freelancer?.name || `Freelancer ID: ${bid.freelancerId}`}</TableCell>
+                      <TableCell>
+                        <Link
+                          to={`/users/${bid.freelancerId}`}
+                          style={{
+                            color: '#1976d2',
+                            textDecoration: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {bid.freelancer?.name || `Freelancer ID: ${bid.freelancerId}`}
+                        </Link>
+                      </TableCell>
                       <TableCell>{bid.amount}</TableCell>
                       <TableCell>{bid.duration}</TableCell>
                       <TableCell>{bid.message}</TableCell>

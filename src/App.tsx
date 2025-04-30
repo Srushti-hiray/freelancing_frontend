@@ -9,6 +9,7 @@ import UserDetails from './pages/UserDetails';
 import { ThemeProvider } from './context/ThemeContext';
 import { SnackbarProvider } from './context/SnackbarContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProjectDetailsPage from './pages/ProjectDetailsPage';
 
 function App() {
   return (
@@ -58,6 +59,14 @@ function App() {
                   <UserDetails />
                 </ProtectedRoute>
               }
+            />
+            <Route 
+              path="/projects/:id" 
+              element={
+                <ProtectedRoute role="freelancer">
+                  <ProjectDetailsPage />
+                </ProtectedRoute>
+              } 
             />
           </Routes>
         </SnackbarProvider>

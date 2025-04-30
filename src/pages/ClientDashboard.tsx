@@ -18,6 +18,13 @@ import {
   DialogTitle,
   DialogContent,
   TextField,
+  Box,
+  Card,
+  CardContent,
+  Stack,
+  Chip,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import Sidebar from '../components/Sidebar';
 import ProjectDetails from '../components/ProjectDetails';
@@ -30,6 +37,17 @@ import { getProjects, createProject, updateProject, deleteProject } from '../api
 import { getFreelancers } from '../api/users';
 import { getSkills } from '../api/skills';
 import { Project, Skill } from '../types';
+import Grid from '@mui/material/Grid';
+import WorkIcon from '@mui/icons-material/Work';
+import PersonIcon from '@mui/icons-material/Person';
+import MoneyIcon from '@mui/icons-material/Money';
+import SearchIcon from '@mui/icons-material/Search';
+import CalendarIcon from '@mui/icons-material/CalendarToday';
+import ViewIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import { useTheme } from '@mui/material/styles';
 
 function ClientDashboard() {
   const { user } = useUserStore();
@@ -47,6 +65,8 @@ function ClientDashboard() {
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [editForm, setEditForm] = useState({ title: '', category: '', description: '', budget: '', deadline: '' });
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const theme = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (user?.role === 'client') {
@@ -59,9 +79,15 @@ function ClientDashboard() {
 
   const handleSearch = async () => {
     try {
-      const { data } = await getFreelancers(selectedSkills);
-      setFreelancers(data);
+      console.log('Searching with skills:', selectedSkills);
+      const response = await getFreelancers(selectedSkills);
+      console.log('Raw API Response:', response);
+      // Make sure we're using the correct data from the response
+      const freelancerData = response.data;
+      console.log('Freelancer data to be set:', freelancerData);
+      setFreelancers(freelancerData);
     } catch (error: any) {
+      console.error('Search error:', error);
       showSnackbar(error.response?.data?.message || 'Search failed', 'error');
     }
   };
@@ -132,103 +158,314 @@ function ClientDashboard() {
   };
 
   return (
-    <div style={{ background: 'var(--background-color)', minHeight: '100vh' }}>
-      <Sidebar />
-      <div className="content">
-        <Typography variant="h4" gutterBottom>
-          Client Dashboard
-        </Typography>
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Skills</InputLabel>
-          <Select
-            multiple
-            value={selectedSkills}
-            onChange={(e) => setSelectedSkills(e.target.value as string[])}
-            renderValue={(selected) => selected.join(', ')}
-          >
-            {skills.map((skill: Skill) => (
-              <MenuItem key={skill.id} value={skill.name}>
-                {skill.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Button variant="contained" onClick={handleSearch}>
-          Search Freelancers
-        </Button>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Skills</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {freelancers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((freelancer) => (
-                <TableRow key={freelancer.id}>
-                  <TableCell>{freelancer.name}</TableCell>
-                  <TableCell>{freelancer.skills?.join(', ')}</TableCell>
-                  <TableCell>
-                    <Button onClick={() => navigate(`/users/${freelancer.id}`)}>View</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <TablePagination
-            rowsPerPageOptions={[10, 25, 50]}
-            component="div"
-            count={freelancers.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={(e, newPage) => setPage(newPage)}
-            onRowsPerPageChange={(e) => {
-              setRowsPerPage(parseInt(e.target.value, 10));
-              setPage(0);
+    <Box sx={{ 
+      display: 'flex', 
+      minHeight: '100vh',
+      bgcolor: 'background.default'
+    }}>
+      <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <Box sx={{ 
+        flexGrow: 1, 
+        width: '100%', 
+        px: { xs: 1, sm: 2 },
+        pt: { xs: 2, md: 3 },
+        pb: { xs: 2, md: 3 },
+        maxWidth: { xs: '100%', md: 1200, lg: 1400 }, 
+        mx: 'auto',
+        ml: sidebarOpen ? '240px' : 0,
+        transition: theme => theme.transitions.create(['margin'], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
+      }}>
+        {/* Hero Banner */}
+        <Box sx={{
+          mb: 4,
+          p: { xs: 2, md: 4 },
+          borderRadius: 3,
+          background: theme.palette.mode === 'dark' 
+            ? 'linear-gradient(90deg, #1565c0 60%, #1976d2 100%)'
+            : 'linear-gradient(90deg, #1976d2 60%, #42a5f5 100%)',
+          color: '#fff',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          boxShadow: 3,
+          gap: 3
+        }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              Welcome to Your Client Dashboard!
+            </Typography>
+            <Typography variant="h6" sx={{ opacity: 0.9 }}>
+              Post projects, find talented freelancers, and get work done.
+            </Typography>
+          </Box>
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <img 
+              src="https://img.freepik.com/free-vector/business-team-putting-together-jigsaw-puzzle-isolated-flat-vector-illustration-cartoon-partners-working-connection-teamwork-partnership-cooperation-concept_74855-9814.jpg" 
+              alt="Client Dashboard" 
+              style={{ height: 120, borderRadius: 12, boxShadow: '0 4px 24px rgba(25, 118, 210, 0.15)' }} 
+            />
+          </Box>
+        </Box>
+
+        {/* Stats Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Card sx={{
+              borderRadius: 3,
+              boxShadow: 2,
+              p: 2,
+              background: theme.palette.mode === 'dark'
+                ? 'linear-gradient(135deg, rgba(25, 118, 210, 0.2) 60%, rgba(25, 118, 210, 0.3) 100%)'
+                : 'linear-gradient(135deg, #e3f2fd 60%, #bbdefb 100%)',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+            }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <WorkIcon sx={{ fontSize: 40, color: '#1976d2' }} />
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Active Projects</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#1976d2' }}>{projects.length}</Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Card sx={{
+              borderRadius: 3,
+              boxShadow: 2,
+              p: 2,
+              background: theme.palette.mode === 'dark'
+                ? 'linear-gradient(135deg, rgba(46, 125, 50, 0.2) 60%, rgba(46, 125, 50, 0.3) 100%)'
+                : 'linear-gradient(135deg, #e8f5e9 60%, #c8e6c9 100%)',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+            }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <MoneyIcon sx={{ fontSize: 40, color: '#2e7d32' }} />
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Total Budget</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#2e7d32' }}>
+                    ${projects.reduce((total, project) => total + Number(project.budget), 0).toLocaleString()}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Create Project Button */}
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setOpenProjectDialog(true)}
+            sx={{ 
+              borderRadius: 2, 
+              textTransform: 'none', 
+              px: 3, 
+              py: 1.2,
+              background: theme.palette.mode === 'dark'
+                ? 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)'
+                : 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+              boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
+              '&:hover': {
+                background: theme.palette.mode === 'dark'
+                  ? 'linear-gradient(45deg, #104c8c 30%, #1565c0 90%)'
+                  : 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+              }
             }}
-          />
-        </TableContainer>
-        <Button variant="contained" onClick={() => setOpenProjectDialog(true)}>
-          Create Project
-        </Button>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Title</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Budget</TableCell>
-                <TableCell>Deadline</TableCell>
-                <TableCell>Action</TableCell>
-                <TableCell>Edit/Delete</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {projects.map((project) => (
-                <TableRow key={project.id}>
-                  <TableCell>{project.title}</TableCell>
-                  <TableCell>{project.category}</TableCell>
-                  <TableCell>{project.budget}</TableCell>
-                  <TableCell>{project.deadline}</TableCell>
-                  <TableCell>
-                    <Button onClick={() => setSelectedProject(project)}>View</Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button onClick={() => handleEditClick(project)} color="primary">Edit</Button>
-                    <Button onClick={() => handleDeleteProject(project.id)} color="error">Delete</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+          >
+            Create New Project
+          </Button>
+        </Box>
+
+        {/* Main Content: Search Freelancers & Projects Table */}
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <Card sx={{ 
+              borderRadius: 3, 
+              boxShadow: 1, 
+              p: 2,
+              bgcolor: 'background.paper',
+              transition: 'box-shadow 0.2s', 
+              '&:hover': { boxShadow: 4 } 
+            }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Search Freelancers</Typography>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 2 }}>
+                  <FormControl fullWidth>
+                    <InputLabel>Skills</InputLabel>
+                    <Select
+                      multiple
+                      value={selectedSkills}
+                      onChange={(e) => setSelectedSkills(e.target.value as string[])}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selected.map((value) => (
+                            <Chip key={value} label={value} size="small" color="primary" />
+                          ))}
+                        </Box>
+                      )}
+                    >
+                      {skills.map((skill) => (
+                        <MenuItem key={skill.id} value={skill.name}>{skill.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Button
+                    variant="contained"
+                    startIcon={<SearchIcon />}
+                    onClick={handleSearch}
+                    sx={{ minWidth: 140, borderRadius: 2, alignSelf: { xs: 'stretch', sm: 'center' } }}
+                  >
+                    Search
+                  </Button>
+                </Box>
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Skills</TableCell>
+                        <TableCell align="right">Action</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {freelancers && freelancers.length > 0 ? (
+                        freelancers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((freelancer) => (
+                          <TableRow key={freelancer.id}>
+                            <TableCell>{freelancer.name}</TableCell>
+                            <TableCell>
+                              <Stack direction="row" spacing={1}>
+                                {Array.isArray(freelancer.skills) && freelancer.skills.map((skill) => (
+                                  <Chip key={skill} label={skill} size="small" color="primary" />
+                                ))}
+                              </Stack>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => navigate(`/users/${freelancer.id}`)}
+                                sx={{ borderRadius: 2 }}
+                              >
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={3} align="center">
+                            No freelancers found
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                  <TablePagination
+                    rowsPerPageOptions={[10, 25, 50]}
+                    component="div"
+                    count={freelancers.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={(e, newPage) => setPage(newPage)}
+                    onRowsPerPageChange={(e) => {
+                      setRowsPerPage(parseInt(e.target.value, 10));
+                      setPage(0);
+                    }}
+                  />
+                </TableContainer>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Projects Table */}
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <Card sx={{ 
+              borderRadius: 3, 
+              boxShadow: 1, 
+              p: 2,
+              bgcolor: 'background.paper',
+              transition: 'box-shadow 0.2s', 
+              '&:hover': { boxShadow: 4 } 
+            }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Your Projects</Typography>
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Title</TableCell>
+                        <TableCell>Category</TableCell>
+                        <TableCell>Budget</TableCell>
+                        <TableCell>Deadline</TableCell>
+                        <TableCell align="right">Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {projects.map((project) => (
+                        <TableRow key={project.id}>
+                          <TableCell>{project.title}</TableCell>
+                          <TableCell>
+                            <Chip label={project.category} size="small" color="primary" />
+                          </TableCell>
+                          <TableCell>${project.budget.toLocaleString()}</TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <CalendarIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                              {project.deadline}
+                            </Box>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                              <Tooltip title="View Details">
+                                <IconButton size="small" onClick={() => setSelectedProject(project)} color="primary">
+                                  <ViewIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Edit Project">
+                                <IconButton size="small" onClick={() => handleEditClick(project)} color="primary">
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete Project">
+                                <IconButton size="small" onClick={() => handleDeleteProject(project.id)} color="error">
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Dialogs remain unchanged */}
         {selectedProject && (
           <ProjectDetails project={selectedProject} setSelectedProject={setSelectedProject} />
         )}
-        <Dialog open={openProjectDialog} onClose={() => setOpenProjectDialog(false)}>
-          <DialogTitle>Create Project</DialogTitle>
+        <Dialog 
+          open={openProjectDialog} 
+          onClose={() => setOpenProjectDialog(false)} 
+          maxWidth="sm" 
+          fullWidth
+          PaperProps={{
+            sx: {
+              bgcolor: 'background.paper',
+            }
+          }}
+        >
+          <DialogTitle>Create New Project</DialogTitle>
           <DialogContent>
             <form onSubmit={handleCreateProject}>
               <TextField
@@ -283,7 +520,17 @@ function ClientDashboard() {
             </form>
           </DialogContent>
         </Dialog>
-        <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+        <Dialog 
+          open={openEditDialog} 
+          onClose={() => setOpenEditDialog(false)} 
+          maxWidth="sm" 
+          fullWidth
+          PaperProps={{
+            sx: {
+              bgcolor: 'background.paper',
+            }
+          }}
+        >
           <DialogTitle>Edit Project</DialogTitle>
           <DialogContent>
             <form onSubmit={handleEditProject}>
@@ -339,8 +586,8 @@ function ClientDashboard() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

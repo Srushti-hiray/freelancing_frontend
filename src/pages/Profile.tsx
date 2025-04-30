@@ -1,5 +1,19 @@
 import { useState, useEffect, useContext } from 'react';
-import { Typography, TextField, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import {
+  Typography,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Card,
+  CardContent,
+  Box,
+  Avatar,
+  Stack,
+  Divider
+} from '@mui/material';
 import useUserStore from '../stores/user';
 import useSkillsStore from '../stores/skills';
 import { SnackbarContext } from '../context/SnackbarContext';
@@ -17,7 +31,6 @@ function Profile() {
 
   useEffect(() => {
     if (user) {
-      console.log('User object:', user);
       setForm({
         name: user.name,
         bio: user.bio || '',
@@ -45,57 +58,72 @@ function Profile() {
   };
 
   return (
-    <div className="container" style={{ background: 'var(--background-color)', color: 'var(--text-color)', minHeight: '100vh' }}>
-      <Typography variant="h4" gutterBottom>
-        Profile
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Bio"
-          value={form.bio}
-          onChange={(e) => setForm({ ...form, bio: e.target.value })}
-          multiline
-          rows={4}
-          fullWidth
-          margin="normal"
-        />
-        {user?.role === 'freelancer' && (
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Skills</InputLabel>
-            <Select
-              multiple
-              value={form.skills}
-              onChange={(e) => setForm({ ...form, skills: e.target.value as string[] })}
-              renderValue={(selected) => selected.join(', ')}
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f6fa', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 6 }}>
+      <Card sx={{ maxWidth: 600, width: '100%', borderRadius: 3, boxShadow: 3, p: { xs: 2, sm: 4 } }}>
+        <CardContent>
+          <Stack spacing={3} alignItems="center">
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+              Profile
+            </Typography>
+            <Divider sx={{ width: '100%' }} />
+            <Avatar
+              src={form.profileImage}
+              alt={form.name}
+              sx={{ width: 100, height: 100, mb: 1, bgcolor: 'primary.light', fontSize: 40 }}
             >
-              {skills.map((skill: Skill) => (
-                <MenuItem key={skill.id} value={skill.name}>
-                  {skill.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
-        <TextField
-          label="Profile Image URL"
-          value={form.profileImage}
-          onChange={(e) => setForm({ ...form, profileImage: e.target.value })}
-          fullWidth
-          margin="normal"
-        />
-        {form.profileImage && <img src={form.profileImage} alt="Profile" style={{ width: 100, height: 100, marginTop: 8 }} />}
-        <Button type="submit" variant="contained" fullWidth>
-          Save
-        </Button>
-      </form>
-    </div>
+              {(!form.profileImage && form.name) ? form.name[0].toUpperCase() : ''}
+            </Avatar>
+            <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+              <Stack spacing={2}>
+                <TextField
+                  label="Name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  fullWidth
+                  margin="none"
+                />
+                <TextField
+                  label="Bio"
+                  value={form.bio}
+                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                  multiline
+                  rows={3}
+                  fullWidth
+                  margin="none"
+                />
+                {user?.role === 'freelancer' && (
+                  <FormControl fullWidth>
+                    <InputLabel>Skills</InputLabel>
+                    <Select
+                      multiple
+                      value={form.skills}
+                      onChange={(e) => setForm({ ...form, skills: e.target.value as string[] })}
+                      renderValue={(selected) => selected.join(', ')}
+                    >
+                      {skills.map((skill: Skill) => (
+                        <MenuItem key={skill.id} value={skill.name}>
+                          {skill.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+                <TextField
+                  label="Profile Image URL"
+                  value={form.profileImage}
+                  onChange={(e) => setForm({ ...form, profileImage: e.target.value })}
+                  fullWidth
+                  margin="none"
+                />
+                <Button type="submit" variant="contained" size="large" fullWidth sx={{ borderRadius: 2, py: 1.2, fontWeight: 600 }}>
+                  Save
+                </Button>
+              </Stack>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
 

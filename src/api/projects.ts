@@ -70,3 +70,6 @@ export const updateProject = (id: number, data: Partial<{ title: string; categor
 export const getProjectById = (id: number) => api.get(`/projects/${id}`);
 
 export const deleteProject = (id: number) => api.delete(`/projects/${id}`);
+
+export const getProjectCountByFreelancer = (freelancerId: number) =>
+  api.get(`/projects/count?freelancerId=${freelancerId}`);

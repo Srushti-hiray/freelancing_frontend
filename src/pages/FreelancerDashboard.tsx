@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Typography,
   FormControl,
@@ -20,6 +20,10 @@ import {
   DialogContent,
   FormControlLabel,
   Checkbox,
+  Card,
+  CardContent,
+  Grid,
+  Box,
 } from '@mui/material';
 import Sidebar from '../components/Sidebar';
 import ProjectDetails from '../components/ProjectDetails';
@@ -29,6 +33,12 @@ import { SnackbarContext } from '../context/SnackbarContext';
 import { getProjects} from '../api/projects';
 import { createBid } from '../api/bids';
 import { Project } from '../types';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import { getBidCountByFreelancer } from '../api/bids';
+import { getProjectCountByFreelancer } from '../api/projects';
+import { useTheme } from '@mui/material/styles';
 
 function FreelancerDashboard() {
   const { user } = useUserStore();
@@ -48,6 +58,9 @@ function FreelancerDashboard() {
   const [openBidDialog, setOpenBidDialog] = useState(false);
   const { showSnackbar } = useContext(SnackbarContext);
   const navigate = useNavigate();
+  const [bidsSubmitted, setBidsSubmitted] = useState(0);
+  const [projectsWon, setProjectsWon] = useState(0);
+  const theme = useTheme();
 
   const handleSearch = () => {
     if (!user) {
@@ -173,6 +186,13 @@ function FreelancerDashboard() {
       });
   }, [user, showCurrent, setProjects, showSnackbar, navigate]);
 
+  useEffect(() => {
+    if (user?.id) {
+      getBidCountByFreelancer(user.id).then(res => setBidsSubmitted(res.data.count)).catch(() => setBidsSubmitted(0));
+      getProjectCountByFreelancer(user.id).then(res => setProjectsWon(res.data.count)).catch(() => setProjectsWon(0));
+    }
+  }, [user?.id]);
+
   const handleBidSubmit = async (projectId: number) => {
     try {
       // Validate form values
@@ -213,123 +233,231 @@ function FreelancerDashboard() {
     }
   };
 
+  // Example stats (replace with real data if available)
+  const activeBids = 5;
+
   return (
-    <div style={{ background: 'var(--background-color)', minHeight: '100vh' }}>
+    <Box sx={{ 
+      display: 'flex', 
+      minHeight: '100vh',
+      bgcolor: 'background.default'
+    }}>
       <Sidebar />
-      <div className="content">
-        <Typography variant="h4" gutterBottom>
-          Freelancer Dashboard
-        </Typography>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', marginBottom: '24px' }}>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={filter.category}
-              onChange={(e) => setFilter({ ...filter, category: e.target.value })}
-            >
-              <MenuItem value="">All</MenuItem>
-              {['web-development', 'mobile', 'design', 'writing', 'marketing'].map((cat) => (
-                <MenuItem key={cat} value={cat}>
-                  {cat}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            label="Min Budget"
-            type="number"
-            value={filter.minBudget}
-            onChange={(e) => {
-              const value = e.target.value;
-              setFilter({ ...filter, minBudget: value === '' ? '' : parseFloat(value) });
+      <Box sx={{ flexGrow: 1, width: '100%', px: { xs: 1, sm: 2, md: 4 }, py: { xs: 2, md: 4 }, maxWidth: { xs: '100%', md: 1200, lg: 1400 }, mx: 'auto' }}>
+        {/* Hero Banner */}
+        <Box sx={{
+          mb: 4,
+          p: { xs: 2, md: 4 },
+          borderRadius: 3,
+          background: theme.palette.mode === 'dark' 
+            ? 'linear-gradient(90deg, #1565c0 60%, #1976d2 100%)'
+            : 'linear-gradient(90deg, #1976d2 60%, #42a5f5 100%)',
+          color: '#fff',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          boxShadow: 3,
+          gap: 3
+        }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              Welcome, Freelancer!
+            </Typography>
+            <Typography variant="h6" sx={{ opacity: 0.9 }}>
+              Find projects, submit bids, and grow your freelance career.
+            </Typography>
+          </Box>
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <img src="https://img.freepik.com/free-vector/freelancer-working-laptop-her-house_1150-35055.jpg" alt="Freelancer" style={{ height: 120, borderRadius: 12, boxShadow: '0 4px 24px rgba(25, 118, 210, 0.15)' }} />
+          </Box>
+        </Box>
+
+        {/* Stats Cards */}
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: 2,
+              p: 2,
+              minWidth: 300,
+              maxWidth: 500,
+              width: '100%',
+              background: theme.palette.mode === 'dark'
+                ? 'linear-gradient(135deg, rgba(25, 118, 210, 0.2) 60%, rgba(25, 118, 210, 0.3) 100%)'
+                : 'linear-gradient(135deg, #e3f2fd 60%, #bbdefb 100%)',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
             }}
-            margin="normal"
-            sx={{ width: '200px' }}
-          />
-          <TextField
-            label="Max Budget"
-            type="number"
-            value={filter.maxBudget}
-            onChange={(e) => {
-              const value = e.target.value;
-              setFilter({ ...filter, maxBudget: value === '' ? '' : parseFloat(value) });
-            }}
-            margin="normal"
-            sx={{ width: '200px' }}
-          />
-          <TextField
-            label="Min Deadline"
-            type="date"
-            value={filter.minDeadline}
-            onChange={(e) => setFilter({ ...filter, minDeadline: e.target.value })}
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-            sx={{ width: '200px' }}
-          />
-          <FormControlLabel
-            control={<Checkbox checked={showCurrent} onChange={(e) => setShowCurrent(e.target.checked)} />}
-            label="Show Current Projects"
-            sx={{ marginTop: '16px' }}
-          />
-          <Button 
-            variant="contained" 
-            onClick={handleSearch}
-            sx={{ marginTop: '16px', height: '56px' }}
           >
-            Search
-          </Button>
-        </div>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Title</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Budget</TableCell>
-                <TableCell>Deadline</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {projects.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((project) => (
-                <TableRow key={project.id}>
-                  <TableCell>{project.title}</TableCell>
-                  <TableCell>{project.category}</TableCell>
-                  <TableCell>{project.budget}</TableCell>
-                  <TableCell>{project.deadline}</TableCell>
-                  <TableCell>
-                    {(project.freelancerId === user?.id || project.freelancer?.id === user?.id) && (
-                      <Button onClick={() => setSelectedProject(project)}>View</Button>
-                    )}
-                    {!showCurrent && (
-                      <Button
-                        onClick={() => {
-                          setBidForm({ amount: '', duration: '', message: '' });
-                          setSelectedProjectForBid(project);
-                          setOpenBidDialog(true);
-                        }}
-                      >
-                        Bid
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <TablePagination
-            rowsPerPageOptions={[10, 25, 50]}
-            component="div"
-            count={projects.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={(e, newPage) => setPage(newPage)}
-            onRowsPerPageChange={(e) => {
-              setRowsPerPage(parseInt(e.target.value, 10));
-              setPage(0);
-            }}
-          />
-        </TableContainer>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <TrendingUpIcon sx={{ fontSize: 40, color: '#1976d2' }} />
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Bids Submitted
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: '#1976d2' }}>
+                  {bidsSubmitted}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+
+        {/* Filters Section */}
+        <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 1, p: { xs: 2, sm: 3 }, transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 4 } }}>
+          <CardContent>
+            <Grid container spacing={2} alignItems="center">
+              <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+                <FormControl fullWidth sx={{ height: 56, justifyContent: 'center' }}>
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    value={filter.category}
+                    onChange={(e) => setFilter({ ...filter, category: e.target.value })}
+                    size="medium"
+                    sx={{ height: 56, display: 'flex', alignItems: 'center' }}
+                    inputProps={{ sx: { height: 56, display: 'flex', alignItems: 'center', padding: '0 14px' } }}
+                    MenuProps={{ PaperProps: { sx: { fontSize: 18 } } }}
+                  >
+                    <MenuItem value="" sx={{ fontSize: 18 }}>All</MenuItem>
+                    {['web-development', 'mobile', 'design', 'writing', 'marketing'].map((cat) => (
+                      <MenuItem key={cat} value={cat} sx={{ fontSize: 18 }}>{cat}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 3 }}>
+                <TextField
+                  label="Min Budget"
+                  type="number"
+                  value={filter.minBudget}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFilter({ ...filter, minBudget: value === '' ? '' : parseFloat(value) });
+                  }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 3 }}>
+                <TextField
+                  label="Max Budget"
+                  type="number"
+                  value={filter.maxBudget}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFilter({ ...filter, maxBudget: value === '' ? '' : parseFloat(value) });
+                  }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField
+                  label="Min Deadline"
+                  type="date"
+                  value={filter.minDeadline}
+                  onChange={(e) => setFilter({ ...filter, minDeadline: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <FormControlLabel
+                  control={<Checkbox checked={showCurrent} onChange={(e) => setShowCurrent(e.target.checked)} />}
+                  label="Show Current Projects"
+                  sx={{ marginTop: '16px' }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <Button 
+                  variant="contained" 
+                  onClick={handleSearch}
+                  fullWidth
+                  sx={{ height: 56, borderRadius: 2 }}
+                >
+                  Search
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+
+        {/* Projects Table Section */}
+        <Card sx={{ 
+          borderRadius: 3, 
+          boxShadow: 1, 
+          p: { xs: 2, sm: 3 }, 
+          bgcolor: 'background.paper',
+          transition: 'box-shadow 0.2s', 
+          '&:hover': { boxShadow: 4 } 
+        }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+              Available Projects
+            </Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Title</TableCell>
+                    <TableCell>Category</TableCell>
+                    <TableCell>Budget</TableCell>
+                    <TableCell>Deadline</TableCell>
+                    <TableCell>Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {projects.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((project) => (
+                    <TableRow key={project.id}>
+                      <TableCell>
+                        <Link 
+                          to={`/projects/${project.id}`}
+                          style={{
+                            color: '#1976d2',
+                            textDecoration: 'none'
+                          }}
+                        >
+                          {project.title}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{project.category}</TableCell>
+                      <TableCell>${project.budget}</TableCell>
+                      <TableCell>{new Date(project.deadline).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        {(project.freelancerId === user?.id || project.freelancer?.id === user?.id) && (
+                          <Button onClick={() => setSelectedProject(project)}>View</Button>
+                        )}
+                        {!showCurrent && (
+                          <Button
+                            onClick={() => {
+                              setBidForm({ amount: '', duration: '', message: '' });
+                              setSelectedProjectForBid(project);
+                              setOpenBidDialog(true);
+                            }}
+                          >
+                            Bid
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 50]}
+                component="div"
+                count={projects.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={(e, newPage) => setPage(newPage)}
+                onRowsPerPageChange={(e) => {
+                  setRowsPerPage(parseInt(e.target.value, 10));
+                  setPage(0);
+                }}
+              />
+            </TableContainer>
+          </CardContent>
+        </Card>
+
         {selectedProject && (
           <ProjectDetails project={selectedProject} setSelectedProject={setSelectedProject} />
         )}
@@ -373,8 +501,8 @@ function FreelancerDashboard() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

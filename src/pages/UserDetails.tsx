@@ -1,6 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, CircularProgress, Card, CardContent, Avatar, Grid, Chip, Box } from '@mui/material';
+import {
+  Typography,
+  CircularProgress,
+  Card,
+  CardContent,
+  Avatar,
+  Box,
+  Chip,
+  Stack,
+  Divider
+} from '@mui/material';
 import { SnackbarContext } from '../context/SnackbarContext';
 import api from '../api';
 import { User } from '../types';
@@ -30,60 +40,55 @@ function UserDetails() {
 
   if (loading) {
     return (
-      <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', background: 'var(--background-color)', color: 'var(--text-color)' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', bgcolor: '#f5f6fa' }}>
         <CircularProgress />
-      </div>
+      </Box>
     );
   }
 
   if (!user) {
     return (
-      <div className="container" style={{ background: 'var(--background-color)', color: 'var(--text-color)', minHeight: '100vh' }}>
+      <Box sx={{ bgcolor: '#f5f6fa', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Typography variant="h5">User not found</Typography>
-      </div>
+      </Box>
     );
   }
 
   return (
-    <Box className="container" sx={{ background: 'var(--background-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <Card sx={{ maxWidth: 700, width: '100%', p: 4, boxShadow: 3, borderRadius: 3 }}>
+    <Box sx={{ bgcolor: '#f5f6fa', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', py: 6 }}>
+      <Card sx={{ maxWidth: 600, width: '100%', borderRadius: 3, boxShadow: 3, p: { xs: 2, sm: 4 } }}>
         <CardContent>
-          <Grid container spacing={2} direction="column" alignItems="center">
-            <Grid item>
-              <Avatar
-                src={user.profile_Image || user.profileImage || undefined}
-                alt={user.name}
-                sx={{ width: 150, height: 150, mb: 2, fontSize: 56 }}
-              >
-                {user.name[0]}
-              </Avatar>
-            </Grid>
-            <Grid item>
-              <Typography variant="h5" gutterBottom align="center">
-                {user.name}
-              </Typography>
-              <Typography variant="subtitle1" color="text.secondary" align="center" gutterBottom>
-                {user.role === 'freelancer' ? 'Freelancer' : 'Client'}
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="body1" align="center" paragraph>
-                {user.bio || 'No bio available'}
-              </Typography>
-            </Grid>
+          <Stack spacing={3} alignItems="center">
+            <Avatar
+              src={user.profile_Image || user.profileImage || undefined}
+              alt={user.name}
+              sx={{ width: 120, height: 120, mb: 1, boxShadow: 2, border: '4px solid #e3f2fd', fontSize: 48, bgcolor: 'primary.light' }}
+            >
+              {(!user.profile_Image && !user.profileImage && user.name) ? user.name[0].toUpperCase() : ''}
+            </Avatar>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main', textAlign: 'center' }}>
+              {user.name}
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary" sx={{ textAlign: 'center' }}>
+              {user.role === 'freelancer' ? 'Freelancer' : 'Client'}
+            </Typography>
+            <Divider sx={{ width: '100%' }} />
+            <Typography variant="body1" sx={{ textAlign: 'center' }}>
+              {user.bio || 'No bio available'}
+            </Typography>
             {user.skills && user.skills.length > 0 && (
-              <Grid item>
-                <Typography variant="subtitle2" gutterBottom align="center">
+              <Box sx={{ width: '100%' }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, textAlign: 'center', fontWeight: 600 }}>
                   Skills
                 </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+                <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center">
                   {user.skills.map((skill) => (
-                    <Chip key={skill} label={skill} color="primary" variant="outlined" />
+                    <Chip key={skill} label={skill} color="primary" variant="filled" sx={{ mb: 1 }} />
                   ))}
-                </Box>
-              </Grid>
+                </Stack>
+              </Box>
             )}
-          </Grid>
+          </Stack>
         </CardContent>
       </Card>
     </Box>
